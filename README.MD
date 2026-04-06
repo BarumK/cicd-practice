@@ -24,11 +24,11 @@
         Stage 3 : Test
         Stage 4 : Docker Build
         Stage 5 : Deploy
-    7.6. Pipeline Script 작성: jenkinsfiles/Jenkinsfile.v1 참고
+    7.6. Pipeline Script 작성: Jenkinsfiles/Jenkinsfile.v1 참고
 
 # 8. Git 초기화 및 GitHub 원격 레포지토리 연결
 
-# 9. Pipeline 코드 수정 후 재빌드: Jenkins와 원격 레포지토리를 연결, jenkinsfiles/Jenkinsfile.v2 & jenkinsfiles/Jenkinsfile.v3 참고
+# 9. Pipeline 코드 수정 후 재빌드: Jenkins와 원격 레포지토리를 연결, Jenkinsfiles/Jenkinsfile.v2 & Jenkinsfiles/Jenkinsfile.v3 참고
     9.1. 이 시점까지 완료된 것
         Jenkins 실행
         ↓
@@ -46,7 +46,7 @@
         stop old container
         remove old container
         run new container
-    10.2. jenkinsfiles/Jenkinsfile.v4 참고
+    10.2. Jenkinsfiles/Jenkinsfile.v4 참고
     10.3. 이 시점까지 완료된 것
         Git Push
         ↓
@@ -63,7 +63,7 @@
     11.2. ngrok을 사용하는 이유는 로컬호스트 상에서 하는 것이기에 임시방편으로 연결을 위해 열어주는 것
     11.3. ngrok http 8080 통해 실행
 
-# 12. Webhook 설정 추가: jenkinsfiles/Jenkinsfile.v5 참고
+# 12. Webhook 설정 추가: Jenkinsfiles/Jenkinsfile.v5 참고
     12.1. 기존의 방식: Build Now 버튼 누름 → Jenkins가 GitHub에서 코드 가져옴 → Docker 이미지 빌드 → 컨테이너 실행
     12.2. 변경하고자 하는 방식: Build Now 버튼 누름 → Jenkins가 GitHub에서 코드 가져옴 → Docker 이미지 빌드 → 컨테이너 실행
     12.3. 위에서 ngrok을 사용하는 이유는 GitHub가 Jenkins에게 알림을 가능하게 하기 위함(= Webhook)

@@ -58,5 +58,38 @@
         ↓
         새 컨테이너 실행
 
+# 11. ngrok를(로컬 서버를 인터넷에서 접근 가능한 임시 주소로 공개해주는 도구) 사용하여 Github에서 Jenkins에 접근을 가능하게 함
+    11.1. ngrok 설치 및 토큰 등록 과정 필요
+    11.2. ngrok을 사용하는 이유는 로컬호스트 상에서 하는 것이기에 임시방편으로 연결을 위해 열어주는 것
+    11.3. ngrok http 8080 통해 실행
+
+# 12. Webhook 설정 추가: jenkinsfiles/Jenkinsfile.v5 참고
+    12.1. 기존의 방식: Build Now 버튼 누름 → Jenkins가 GitHub에서 코드 가져옴 → Docker 이미지 빌드 → 컨테이너 실행
+    12.2. 변경하고자 하는 방식: Build Now 버튼 누름 → Jenkins가 GitHub에서 코드 가져옴 → Docker 이미지 빌드 → 컨테이너 실행
+    12.3. 위에서 ngrok을 사용하는 이유는 GitHub가 Jenkins에게 알림을 가능하게 하기 위함(= Webhook)
+    12.4. Webhook: 이벤트가 생기면 상대 서버로 바로 HTTP 요청을 보내는 방식
+    12.5. 설정 추가 방식: GitHub
+        12.5.1. GitHub Repo 들어가서 Settings 클릭
+        12.5.2. Webhooks -> Add Webhook 클릭
+        12.5.3. Payload URL 입력: https://{ngrok에서 나온 주소}/github-webhook/
+        12.5.4. Content Type: application/json
+        12.5.5. Trigger: Just the push event
+        12.5.6. Add webhook 클릭
+    12.6. 설정 추가 방식: Jenkins
+        12.6.1. 위에서 설정한 파이프라인 설정에 들어가 Configure(구성) 클릭
+        12.6.2. Triggers -> GitHub hook trigger for GITScm polling 클릭 후 Save
+    12.7. 이 시점에서 완료되는 것:
+        git push
+        ↓
+        GitHub webhook
+        ↓
+        ngrok
+        ↓
+        Jenkins
+        ↓
+        Docker build
+        ↓
+        Container restart
+
 # 참고: Jenkins 문법
     https://dayne-w.tistory.com/19

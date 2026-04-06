@@ -90,6 +90,18 @@
         Docker build
         ↓
         Container restart
+    12.8. 현재 상태로는 어디서 실행되는가
+        원래 구조는 이러하다
+            [내 PC / WSL]
+                │
+                ├─ Docker Engine (호스트)
+                │
+                └─ Jenkins Container
+                        │
+                        └─ docker build / docker run 실행
+        즉 Jenkins 컨테이너 안에서 컨테이너가 실행되어야 하나, docker.sock 마운트를 진행했기에 Jenkins 컨테이너가 호스트 도커 엔진을 직접 제어함
+        따라서 실제로는 Jenkins 컨테이너 안에서 컨테이너가 만들어지는 게 아니라 호스트 Docker에서 컨테이너가 만들어짐(Docker outside of Docker)
+        이 배포하는 과정은 CD
 
 # 참고: Jenkins 문법
     https://dayne-w.tistory.com/19

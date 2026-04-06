@@ -115,31 +115,33 @@
         빌드 속도가 빠르고 이미지 공유가 쉽다는 장점이 있지만, Jenkins 컨테이너가 Docker 엔진을 직접 제어할 수 있어 보안 측면에서 취약할 수 있다는 Trade-Off가 존재
 
 # 참고: Jenkins 문법
-    https://dayne-w.tistory.com/19
+    인터넷 자료
+    - https://www.jenkins.io/doc/book/pipeline/
+    - https://dayne-w.tistory.com/19
 
-    기본 구조
-    ```groovy
-    pipeline {
-        agent any
+Jenkinsfile 기본 구조
+```groovy
+pipeline {
+    agent any
 
-        stages {
-            stage('StageName') {
-                steps {
-                    sh 'command'
-                }
+    stages {
+        stage('StageName') {
+            steps {
+                sh 'command'
             }
         }
     }
-    ```
+}
+```
 
-    | 요소       | 의미          |
-    | -------- | ----------- |
-    | pipeline | 전체 파이프라인    |
-    | agent    | 실행 환경       |
-    | stages   | 단계 묶음       |
-    | stage    | 하나의 단계      |
-    | steps    | 실행 명령       |
-    | sh       | shell 명령 실행 |
+| 요소       | 의미          |
+| -------- | ----------- |
+| pipeline | 전체 파이프라인    |
+| agent    | 실행 환경       |
+| stages   | 단계 묶음       |
+| stage    | 하나의 단계      |
+| steps    | 실행 명령       |
+| sh       | shell 명령 실행 |
 
     일반적인 CI 흐름:
         Checkout

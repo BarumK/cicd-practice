@@ -1,8 +1,8 @@
 # 1. app.py & requirements.txt & Dockerfile 생성
 
-# 2. Docker build: docker build -t cicd-flask .
+# 2. Docker build: docker build -t flask-practice flask-practice/
 
-# 3. Docker run: docker run -p 5000:5000 cicd-flask
+# 3. Docker run: docker run -p 5000:5000 flask-practice
 
 # 4. localhost:5000 접속
 

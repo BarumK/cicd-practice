@@ -16,6 +16,6 @@ spec:
       - name: dockerhub-secret
       containers:
       - name: flask-container
-        image: barumk/flask-practice:20
+        image: barumk/flask-practice:21
         ports:
         - containerPort: 5000

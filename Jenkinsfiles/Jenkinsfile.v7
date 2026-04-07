@@ -52,14 +52,23 @@ pipeline {
 
         stage('Git Push') {
             steps {
-                sh '''
-                git config user.email "jenkins@local"
-                git config user.name "jenkins"
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-creds',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_PASS'
+                    )
+                ]) {
+                    sh '''
+                    git config user.email "jenkins@local"
+                    git config user.name "jenkins"
 
-                git add .
-                git commit -m "Update image"
-                git push origin main
-                '''
+                    git add .
+                    git commit -m "Update image" || true
+
+                    git push https://$GIT_USER:$GIT_PASS@github.com/BarumK/cicd-practice.git main
+                    '''
+                }
             }
         }
 

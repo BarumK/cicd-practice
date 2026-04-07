@@ -212,7 +212,13 @@
         DESTINATION
             Cluster: https://kubernetes.default.svc
             Namespace: default
-    17.9. 이렇게 할 경우
+    17.9. Jenkins에서도 GitHub Credential 추가
+        GitHub Token 생성하여 Jenkins Credential 생성
+        Kind: Username with password
+        Username: BarumK
+        Password: GitHub token
+        ID: github-creds
+    17.10. 이렇게 할 경우
         GitHub repo 읽음
         ↓
         deployment.yaml 확인

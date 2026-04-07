@@ -145,6 +145,80 @@
     14.8. 이 과정이 완료되면...
         GitHub에 Push를 하면 Webhook이 이를 감지하여 Jenkins로 변경사항을 알려주고, 이를 바탕으로 Pull하여 이미지 빌드를 수행하고, Docker Hub에 빌드가 완료된 이미지를 Push 후 로컬에서는 해당 이미지를 기반으로 도커 컨테이너를 실행함
 
+# 15. GCP 설정
+    15.1. GCP Console 접속: https://console.cloud.google.com/
+    15.2. 프로젝트 생성
+        Project name: cicd-practice
+        Location: No organization
+    15.3. GCP의 구조
+        Google Cloud
+            └ Project
+                ├ GKE Cluster
+                ├ VM
+                ├ Network
+                ├ Storage
+        앞으로 만들 것들은 전부 cicd-practice Project 안에 생성됨
+    15.4. GKE API 활성화
+        GKE를 쓰려면 Kubernetes Engine API 활성화 해야 함
+        좌측 메뉴 -> Kubernetes Engine -> 클러스터 -> cicd-practice 클릭 -> Kubernetes Engine API 사용 버튼 클릭
+        해당 클러스터 안으로 진입
+    15.5. 클러스터 생성
+        Autopilot: Google manages your cluster (Recommended) 선택
+            Autopilot 장점: 관리 자동, 설정 간단, 비용 절약, 노드 관리 불필요
+            Standard는: 노드 직접 설정, 비용 더 나갈 가능성, 지금 단계에선 불필요
+        클러스터 이름: cicd-cluster
+        Region 선택: asia-northeast3 (Seoul) / asia-northeast1 (Tokyo) -> 적은 네트워크 지연
+        Fleet 사용 안함: 여러 Kubernetes 클러스터를 대규모로 관리할 때 쓰는 기능이기 때문
+        Networking / Security: 건드리지 말고 기본값 유지
+    15.6. 우리가 만들 클러스터 구조
+        GKE Cluster
+            └ Pods
+                └ Flask App
+    15.7. Cloud Shell 실행 통해 kubectl 연결
+        GCP 화면 오른쪽 상단의 >_ 아이콘 클릭
+        gcloud config get-value project 명령어 입력 시 cicd-practice 나와야 함 -> 만약 다른 값 나오면 gcloud config set project cicd-practice
+        GKE -> 클러스터 목록의 클러스터 상세 화면 상단 연결 (Connect) 클릭하여 나온 주소를 Cloud Shell에 연결
+        gcloud container clusters get-credentials cicd-cluster --region asia-northeast3 --project cicd-practice-XXXXXX 형태
+            Fetching cluster endpoint and auth data.
+            kubeconfig entry generated for cicd-cluster.
+            -> 라는 메세지 뜨면 정상 연결
+
+# 16. Jenkins에서 Build된 이미지를 GCP에서 Pod으로 실행
+    16.1. Cloud Shell에서 파일 생성: vim flask-deployment.yaml (Kubernetes-ConfigFiles/flask-deployment.yaml 참고)
+    16.2. Docker Hub Secret 생성: kubectl create secret docker-registry dockerhub-secret --docker-username=barumk --docker-password=YOUR_DOCKER_PASSWORD --docker-email=wookiigg@gmail.com
+    16.2. Deployment 실행: kubectl apply -f flask-deployment.yaml
+    16.3. Service 생성(외부 접속용): vim flask-service.yaml (Kubernetes-ConfigFiles/flask-service.yaml 참고)
+    16.4. Service 실행: kubectl apply -f flask-service.yaml
+    16.5. External IP 확인: kubectl get service -> 예) flask-service   LoadBalancer   34.xxx.xxx.xxx
+
+# 17. GitOps 자동 배포 구조 생성
+    17.1. ArgoCD Namespace 생성: kubectl create namespace argocd
+    17.2. ArgoCD 설치: kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    17.3. ArgoCD Pod 확인: kubectl get pods -n argocd
+    17.4. ArgoCD 외부 접속 설정: kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+    17.5. External IP 확인: kubectl get svc -n argocd -> 예) argocd-server   LoadBalancer   34.xxx.xxx.xxx
+    17.6. 초기 로그인 비밀번호 확인: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d (아이디는 admin)
+    17.7. 해당 External IP로 접속하여 로그인: https://EXTERNAL-IP
+    17.8. ArgoCD에서 Application 생성
+        왼쪽 상단 NEW APP 클릭
+        GENERAL
+            Application Name: flask-app
+            Project: default
+            Sync Policy: Automatic
+        SOURCE
+            Repository URL: https://github.com/BarumK/cicd-practice
+            Revision: main
+            Path: Kubernetes-ConfigFiles
+        DESTINATION
+            Cluster: https://kubernetes.default.svc
+            Namespace: default
+        이렇게 할 경우
+            GitHub repo 읽음
+            ↓
+            deployment.yaml 확인
+            ↓
+            GKE 자동 배포
+
 # 참고: Jenkins 문법
     인터넷 자료
     - https://www.jenkins.io/doc/book/pipeline/

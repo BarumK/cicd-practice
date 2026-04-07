@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'barumk/flask-practice'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -17,7 +18,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest flask-practice/'
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG flask-practice/'
             }
         }
 
@@ -37,14 +38,14 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                sh 'docker push $IMAGE_NAME:latest'
+                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
             }
         }
 
         stage('Update Kubernetes YAML') {
             steps {
                 sh '''
-                sed -i "s|image: .*|image: $IMAGE_NAME:latest|g" Kubernetes-ConfigFiles/flask-deployment.yaml
+                sed -i "s|image: .*|image: $IMAGE_NAME:$IMAGE_TAG|g" Kubernetes-ConfigFiles/flask-deployment.yaml
                 '''
             }
         }

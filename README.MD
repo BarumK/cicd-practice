@@ -114,6 +114,37 @@
         Docker-in-Docker 방식 대신 docker.sock을 마운트하는 방식을 선택
         빌드 속도가 빠르고 이미지 공유가 쉽다는 장점이 있지만, Jenkins 컨테이너가 Docker 엔진을 직접 제어할 수 있어 보안 측면에서 취약할 수 있다는 Trade-Off가 존재
 
+# 14. Jenkins에서 Docker 이미지를 Docker Hub에 push 하도록 바꾸기
+    14.1. 지금은 Jenkins가 로컬에서 이미지 빌드하고 바로 컨테이너 실행까지 하고 있는데(Jenkins -> docker build -> docker run),
+    14.2. 앞으로 GKE/ArgoCD로 가려면 클러스터가 가져다 쓸 수 있는 공용 이미지 저장소가 필요함(Jenkins -> docker build -> Docker Hub push)
+    14.3. Docker Hub 설정
+        14.3.1. Docker Hub 계정 만들기
+        14.3.2. Docker Hub에 repository 하나 만들기
+		    repository name: flask-practice
+		    프라이빗 레포지토리로 설정 가능하나 나중에 추가적으로 설정 필요
+    14.4. 이미지 빌드
+        Jenkins가 이미지를 빌드할 때, 기존처럼 flask-practice 라고만 만들면 로컬 이미지임
+        Docker Hub에 올리려면 DockerHubID/RepositoryName:Tag 형태여야 push 가능함
+        예) docker build -t barumk/flask-practice:latest flask-practice/
+    14.5. Docker Hub Access Token 만들기
+        Jenkins에서 docker login 해야 push가 가능하기 때문에, 비밀번호를 대신할 Access Token을 사용
+        계정 설정에 들어가 Personal Access Token 생성 - 권한 Read & Write로 설정
+            Run: docker login -u barumk
+            Access Token: 거기에서 나온 내용
+    14.6. Jenkins에 Access Token 등록
+        Manage Jenkins -> Security -> Credentials -> Add Credentials
+        Kind: Username with password
+        Scope: Global
+        Username: 계정 이름
+        Password: Docker Hub에서 받은 Access Token
+        ID: dockerhub-creds
+    14.7. Jenkinsfile 수정: Jenkinsfiles/Jenkinsfile.v6 참고
+        현재 구조: Checkout -> Docker Build -> Stop Old Container -> Run Container
+        변경하려는 구조: Build → Login → Push → Run (임시 유지), 나중에 GKE 가면 Run은 제거
+        핵심 변경 포인트: IMAGE_NAME 추가, Docker Login 추가, Docker Push 추가
+    14.8. 이 과정이 완료되면...
+        GitHub에 Push를 하면 Webhook이 이를 감지하여 Jenkins로 변경사항을 알려주고, 이를 바탕으로 Pull하여 이미지 빌드를 수행하고, Docker Hub에 빌드가 완료된 이미지를 Push 후 로컬에서는 해당 이미지를 기반으로 도커 컨테이너를 실행함
+
 # 참고: Jenkins 문법
     인터넷 자료
     - https://www.jenkins.io/doc/book/pipeline/

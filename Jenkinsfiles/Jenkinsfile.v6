@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'barumk/flask-practice'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                git branch: 'main',
+                url: 'https://github.com/BarumK/cicd-practice.git'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:latest flask-practice/'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh 'docker push $IMAGE_NAME:latest'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                sh 'docker rm -f flask-container || true'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d -p 5000:5000 --name flask-container barumk/flask-practice:latest'
+            }
+        }
+    }
+}

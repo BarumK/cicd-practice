@@ -212,12 +212,32 @@
         DESTINATION
             Cluster: https://kubernetes.default.svc
             Namespace: default
-        이렇게 할 경우
-            GitHub repo 읽음
+    17.9. 이렇게 할 경우
+        GitHub repo 읽음
+        ↓
+        deployment.yaml 확인
+        ↓
+        GKE 자동 배포
+
+# 18. Push → 자동 배포 과정으로 수정: Jenkinsfiles/Jenkinsfile.v7 참고
+    18.1. 최종 자동 배포 흐름
+        GitHub Push
             ↓
-            deployment.yaml 확인
+        Webhook
             ↓
-            GKE 자동 배포
+        Jenkins 실행
+            ↓
+        Docker Build
+            ↓
+        Docker Hub Push
+            ↓
+        deployment.yaml 수정
+            ↓
+        GitHub Push
+            ↓
+        ArgoCD 감지
+            ↓
+        Kubernetes 자동 배포
 
 # 참고: Jenkins 문법
     인터넷 자료

@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'barumk/flask-practice'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                git branch: 'main',
+                url: 'https://github.com/BarumK/cicd-practice.git'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:latest flask-practice/'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh 'docker push $IMAGE_NAME:latest'
+            }
+        }
+
+        stage('Update Kubernetes YAML') {
+            steps {
+                sh '''
+                sed -i "s|image: .*|image: $IMAGE_NAME:latest|g" Kubernetes-ConfigFiles/flask-deployment.yaml
+                '''
+            }
+        }
+
+        stage('Git Push') {
+            steps {
+                sh '''
+                git config user.email "jenkins@local"
+                git config user.name "jenkins"
+
+                git add .
+                git commit -m "Update image"
+                git push origin main
+                '''
+            }
+        }
+
+    }
+}
